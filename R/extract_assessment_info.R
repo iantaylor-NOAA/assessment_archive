@@ -1,13 +1,47 @@
+# 20 June 2024 getting info on extraSD parameters
+# incomplete work to get names of all fleets with indices
+# figure out which ones have Q_extraSD parameters
+# create table of surveys with and without Q_extraSD parameters
+
+models[[1]]$index_variance_tuning_check |> 
+  dplyr::filter(`Input+VarAdj` > 0) |>
+  dplyr::mutate(extraSD = as.numeric(`Input+VarAdj+extra`) - 
+    as.numeric(`Input+VarAdj`)) |> 
+  dplyr::select(extraSD, Name)
+
+# NEXT: rename fleetname to Name
+for(i in 1:40) {
+  print(i)
+  models[[i]]$index_variance_tuning_check |> 
+    dplyr::filter(`Input+VarAdj` > 0) |>
+    dplyr::mutate(extraSD = as.numeric(`Input+VarAdj+extra`) - 
+      as.numeric(`Input+VarAdj`)) |> 
+    dplyr::rename(Name = tidyselect::any_of(fleetname))
+    dplyr::select(extraSD, Name)
+}
 #### old stuff not updated on August 5, 2021
 #### depends on the info2 list created by the load_assessments.R script
+
+info_small <- info2 [,c("Species",
+                       "Stock",
+                       "Type"),]
+phase.info <- NULL
+for(irow in 1:nrow(info.small)){
+  if (info.small$Type[irow] == "Full") {
+    message(paste(irow, paste(info.small[irow,], collapse = " ")))
+    pars <- models[[irow]]$parameters
+    pars <- pars[!is.na(pars$Label) & pars$Phase > 0,]
+    phase.info <- rbind(phase.info,
+                        data.frame(info.small[irow,], pars[,c("Label", "Phase")]))
+  }
+}
 
 # get table with phase info
 info.small <- info2[,c("Species",
                        "Stock",
                        "Type"),]
 phase.info <- NULL
-#for(irow in 1:nrow(info.small)){
-for(irow in 1:19){
+for(irow in 1:nrow(info.small)){
   if (info.small$Type[irow] == "Full") {
     message(paste(irow, paste(info.small[irow,], collapse = " ")))
     pars <- models[[irow]]$parameters
