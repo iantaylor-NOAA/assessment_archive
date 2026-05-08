@@ -1,6 +1,10 @@
 # needs working directory to be location of this repository
 # can be improved by here::here() or some other good practice
-info <- read.csv("inst/extdata/Stock Assessment History - main 14 Feb 2025.csv")
+
+read_output <- FALSE
+read_input <- TRUE
+
+info <- read.csv("inst/extdata/Stock Assessment History - main 2026-05-01.csv")
 (species <- sort(unique(info$Species)))
 #  [1] "Arrowtooth flounder"              "Aurora rockfish"
 #  [3] "Big skate"                        "Black rockfish"
@@ -31,8 +35,10 @@ info <- read.csv("inst/extdata/Stock Assessment History - main 14 Feb 2025.csv")
 # figure out the most recent assessment for each species
 info$newest <- FALSE
 for (s in species) {
-  info$newest[info$Species == s &
-    info$Year == max(info$Year[info$Species == s])] <- TRUE
+  info$newest[
+    info$Species == s &
+      info$Year == max(info$Year[info$Species == s])
+  ] <- TRUE
 }
 
 # filter for models from 2015 onward which also have an archive folder listed
@@ -74,47 +80,63 @@ info2 <- info |>
 ## }
 
 # exclude models with no report files
-info2 <- info2 |> 
+info2 <- info2 |>
   dplyr::filter(Species != "Cabezon" | Stock != "WA") |> # Cabezon WA used SSS
   dplyr::filter(Species != "Pacific hake") # Hake used MCMC
 
-for(irow in 1:nrow(info2)) {
-  if (!file.exists(file.path(info2$Model.archive.directory[irow], "Report.sso"))) {
+for (irow in 1:nrow(info2)) {
+  if (
+    !file.exists(file.path(info2$Model.archive.directory[irow], "Report.sso"))
+  ) {
     cat("missing report in ", info2$Model.archive.directory[irow], "\n")
   }
 }
 
-models <- r4ss::SSgetoutput(
-  dirvec = info2$Model.archive.directory,
-  getcovar = FALSE,
-  getcomp = FALSE,
-  forecast = FALSE
-)
-
-input_files <- list()
-for (i in 1:nrow(info2)) {
-  if (info2$Year[i] %in% 2021:2024 & 
-    info2$Species[i] != "Arrowtooth flounder" &
-    !grepl("BlackRF_2023", info2$Model.archive.directory[i])
-    ) {
-    dir <- info2$Model.archive.directory[i]
-    print(i); print(dir)
-    input_files[[i]] <- r4ss::SS_read(dir)
-  }
+# load model output
+if (read_output) {
+  outputs <- r4ss::SSgetoutput(
+    dirvec = info2$Model.archive.directory
+  )
 }
 
-# # Note sure what I was doing with this incomplete code
-# info2$do_recdev <- 
-# for(i in c(25:29, 34:40)) {
-#    <- input_files
-#   print(mean(models[[i]]$recruit$dev, na.rm = TRUE))
-# }
+# filter for only recent full assessments
+info2_recent <- info2 |>
+  dplyr::filter(Year %in% 2021:2026, Type == "Full")
 
+# load model output for recent full assessments
+if (read_output) {
+  outputs_recent <- r4ss::SSgetoutput(
+    dirvec = info2_recent$Model.archive.directory
+  )
+}
+
+# load model input for recent full assessments
+if (read_input) {
+  inputs_recent <- list()
+  for (i in 1:nrow(info2_recent)) {
+    # if (
+    #   info2_recent$Year[i] %in%
+    #     2021:2026 &
+    #     info2$Species[i] != "Arrowtooth flounder" &
+    #     !grepl("BlackRF_2023", info2$Model.archive.directory[i])
+    # ) {
+    dir <- info2_recent$Model.archive.directory[i]
+    print(i)
+    print(dir)
+    inputs_recent[[i]] <- r4ss::SS_read(dir)
+    # }
+  }
+}
 
 ### don't run the following by accident, included here only as an example of what I did
 if (FALSE) {
   ## save resulting giant list as Rdata file (ignored by git thanks to .gitignore)
-  save(info2, models, file = "data/models_14Feb2025.Rdata")
+  save(
+    info2_recent,
+    outputs_recent,
+    inputs_recent,
+    file = "data/models_recent_full_2026-05-01.Rdata"
+  )
   ## load giant list rather than each individual model
-  load("data/models_14Feb2025.Rdata")
+  load("data/models_recent_full_2026-05-01.Rdata")
 }

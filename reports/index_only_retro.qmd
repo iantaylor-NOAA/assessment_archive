@@ -1,0 +1,35 @@
+# yml header for quarto report
+---
+title: "Index-only retrospective analysis"
+author: "Ian G. Taylor"
+date: "2024-06-17"
+format: html
+editor: visual
+
+# Background
+Processing data is often the most time-consuming element of the assessment workflow. The processessing of the West Coast Groundfish Bottom Trawl Survey (WCGBTS) data is the most streamlined thanks to both the consistent format of these data and the refined R package {nwfscSurvey} for processing them. This raises the question of whether a streamlined update assessment process in which only the survey data were updated would yield similar results to a full update assessment. This report explores that question by running a retrospective analysis in which the most recent 10 years of data are removed from the model except for the WCGBTS index, which is retained up to the final year of the model. The results of this analysis are compared to the results of the original model.
+
+# Selection of assessments
+The following filters were used to select a set of 7 assessments to explore:
+
+1. full assessments only, not updates
+1. assessed in 2021, 2023, or 2025
+1. includes an index from the WCGBTS
+
+This resulted in the following 7 assessments being selected for the retrospective analysis:
+
+1. Dover sole (2021)                    
+2. Pacific spiny dogfish (2021)         
+3. Canary rockfish (2023)               
+4. Petrale sole (2023)                  
+5. Yellowtail rockfish (2025)           
+6. Rougheye/blackspotted rockfish (2025)
+7. Sablefish (2025)
+
+# Results
+
+![Spawning output time series compared between index-only retrospective and original assessment]("../figures/index_only_retro/index_only_retro_spawning_output.png"){#fig-id fig-alt=""}
+
+![Fraction unfished time series compared between index-only retrospective and original assessment]("../figures/index_only_retro/index_only_retro_fraction_unfished.png"){#fig-id fig-alt=""}
+
+![Fit to WCGBTS index compared between index-only retrospective and original assessment]("../figures/index_only_retro/index_only_retro_fit_to_WCGBTS.png"){#fig-id fig-alt=""}
