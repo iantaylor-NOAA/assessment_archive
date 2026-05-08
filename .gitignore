@@ -38,3 +38,11 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# model input and output files
+data-raw/*
+
+# files associated with rendering quarto documents
+*.css
+*.woff
+*.js
