@@ -6,7 +6,7 @@
 #' @param inputs list, model input list as read by r4ss::SS_read, if NULL will be read from dir
 #' @param WCGBTS_fleet numeric, fleet number of the WCGBTS index
 
-index_only_retro <- function(
+remove_recent_data <- function(
   species,
   dir = NULL,
   newdir = NULL,
