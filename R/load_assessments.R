@@ -88,7 +88,7 @@ for (irow in 1:nrow(info2)) {
   if (
     !file.exists(file.path(info2$Model.archive.directory[irow], "Report.sso"))
   ) {
-    cat("missing report in ", info2$Model.archive.directory[irow], "\n")
+    cli::cli_alert_danger("missing report in {info2$Model.archive.directory[irow]}")
   }
 }
 
@@ -112,6 +112,7 @@ if (read_output) {
 
 # load model input for recent full assessments
 if (read_input) {
+  cli::cli_inform("Loading model input for recent full assessments, this may take a while...")
   inputs_recent <- list()
   for (i in 1:nrow(info2_recent)) {
     # if (
@@ -121,8 +122,7 @@ if (read_input) {
     #     !grepl("BlackRF_2023", info2$Model.archive.directory[i])
     # ) {
     dir <- info2_recent$Model.archive.directory[i]
-    print(i)
-    print(dir)
+    cli::cli_alert_info("Loading model input for model {i} from {dir}")
     inputs_recent[[i]] <- r4ss::SS_read(dir)
     # }
   }

@@ -1,5 +1,5 @@
 #' run retrospective analysis removing most recent 10 years of data except for the WCGBTS index
-#' 
+#'
 #' @param species character, name of species to run retrospective for
 #' @param dir character, directory of original model files
 #' @param newdir character, directory to write new model files to
@@ -11,7 +11,10 @@ remove_recent_data <- function(
   dir = NULL,
   newdir = NULL,
   inputs = NULL,
-  WCGBTS_fleet = NULL
+  WCGBTS_fleet = NULL,
+  remove_WCGBTS_lengths = FALSE,
+  remove_WCGBTS_ages = FALSE,
+  remove_WCGBTS_index = FALSE
 ) {
   if (is.null(inputs)) {
     inputs <- r4ss::SS_read(dir)
@@ -20,8 +23,8 @@ remove_recent_data <- function(
   last_data_year <- endyr - 10
   dat <- inputs$dat
   newdat <- inputs$dat
-  
-  # remove all data from the past 10 years except for the data from the WCGBTS 
+
+  # remove all data from the past 10 years except for the data from the WCGBTS
   newdat$lencomp <- dat$lencomp |>
     dplyr::filter(year <= last_data_year | fleet == WCGBTS_fleet)
   newdat$agecomp <- dat$agecomp |>
@@ -29,6 +32,18 @@ remove_recent_data <- function(
   newdat$CPUE <- dat$CPUE |>
     dplyr::filter(year <= last_data_year | index == WCGBTS_fleet)
 
+  if (remove_WCGBTS_lengths) {
+    newdat$lencomp <- newdat$lencomp |>
+      dplyr::filter(year <= last_data_year)
+  }
+  if (remove_WCGBTS_ages) {
+    newdat$agecomp <- newdat$agecomp |>
+      dplyr::filter(year <= last_data_year)
+  }
+  if (remove_WCGBTS_index) {
+    newdat$CPUE <- newdat$CPUE |>
+      dplyr::filter(year <= last_data_year)
+  }
   # replace the data in the model input with the new data
   inputs$dat <- newdat
 
@@ -39,5 +54,5 @@ remove_recent_data <- function(
   inputs$dir <- newdir
   r4ss::SS_write(inputs, dir = inputs$dir, overwrite = TRUE)
 
-  return(inputs$dir)
+  return(invisible(inputs$dir))
 }
