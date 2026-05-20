@@ -5,7 +5,7 @@ make_tables <- FALSE
 modify_model_inputs <- FALSE
 run_models <- FALSE
 load_results_text <- FALSE
-load_results_rda <- FALSE
+load_results_rda <- TRUE
 make_plots_tables <- TRUE
 
 
@@ -568,6 +568,21 @@ if (make_plots_tables) {
   make_plot(
     "summary_biomass_recent.png",
     subplots = 18,
+    xlim = c(1990, 2025),
+    order = order
+  )
+
+  
+  # plots with recent years only
+  make_plot(
+    "spawning_output_recent_no_uncertainty.png",
+    subplots = 1,
+    xlim = c(1990, 2025),
+    order = order
+  )
+  make_plot(
+    "fraction_unfished_recent_no_uncertainty.png",
+    subplots = 3,
     xlim = c(1990, 2025),
     order = order
   )

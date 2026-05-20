@@ -1,5 +1,5 @@
 ---
-title: "Index-only retrospective analysis"
+title: "Retrospectives which retain some or all of the WCGBTS data"
 author: "Ian G. Taylor"
 affiliation: 'NOAA Fisheries Northwest Fisheries Science Center, 2725 Montlake Blvd E, Seattle, WA 98112'
 date: today
@@ -11,7 +11,7 @@ editor: visual
 ---
 
 # Background
-Processing data is often the most time-consuming element of the assessment workflow. The processessing of the West Coast Groundfish Bottom Trawl Survey (WCGBTS) data is the most streamlined thanks to both the consistent format of these data and the refined R package {nwfscSurvey} for processing them. This raises the question of whether a streamlined update assessment process in which only the survey data were updated would yield similar results to a full update assessment. This report explores that question by running a retrospective analysis in which the most recent 10 years of data are removed from the model except for the WCGBTS index, which is retained up to the final year of the model. The results of this analysis are compared to the results of the original model.
+Processing data is often the most time-consuming element of the assessment workflow. The processessing of the West Coast Groundfish Bottom Trawl Survey (WCGBTS) data is the most streamlined thanks to both the consistent format of these data and the refined R package {nwfscSurvey} for processing them. This raises the question of whether a streamlined update assessment process in which only the survey data were updated would yield similar results to a full update assessment. This report explores that question by running a retrospective analysis in which the most recent 10 years of data are removed from the model except for the WCGBTS index, which is retained up to the final year of the model, either with or without age compositions included. The results of this analysis are compared to the results of the original model and a catch-only retrospective (all data except catch from the final 10 years removed).
 
 # Selection of assessments
 The assessments were selected from a list of PFMC assessments to which the following filters were applied:
@@ -32,25 +32,34 @@ This resulted in the following 7 assessments being selected for the retrospectiv
 
 # Methods
 
-Removing data from the SS3 data file for all fleets other than the WCGBTS was really easy (the R function is only 43 lines long: [https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/index_only_retro.R](https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/index_only_retro.R)). However, three models required changes to the other input files to run successfully:
+Removing data from the SS3 data file for all fleets other than the WCGBTS was really easy (the R function is only 43 lines long: [https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/wcgbts_only_retro.R](https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/wcgbts_only_retro.R)). However, three models required changes to the other input files to run successfully:
 
 1. Dover sole: the original model use the .par file for initial values, but differences between SS3 versions required running the model from the initial values in the control file instead 
 2. Sablefish: the environmental index of recruitment was excluded from the model (because it was only from the recent years that were excluded) so the associated catchability parameter also needed to be removed.
 3. Canary rockfish: there were selectivity blocks that started in 2015, 2017 and 2020. Removing the fishery composition data from recent years led to really strange selectivity patterns within those blocks, so the blocks had to be aggregated.
 
-The R script which applies the changes listed above and runs the models is available at [https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/index_only_retro_script.R](https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/index_only_retro_script.R).
+The 4 scenarios for each assessment are:
+
+1. The original full assessment (unchanged from the archived results)
+1. Catch + WCGBTS (index + length comps + age comps), with all other data removed from the most recent 10 years
+1. Catch + WCGBTS (index + length comps), with all other data removed from the most recent 10 years
+1. Catch-only, with all other data removed from the most recent 10 years
+
+The R script which applies the changes listed above and runs the models is available at [https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/wcgbts_only_retro_script.R](https://github.com/iantaylor-NOAA/assessment_archive/blob/main/R/wcgbts_only_retro_script.R).
 
 # Results
 
 The results shown in the table and figures below indicate that the 7 models could be grouped into 3 categories:
 
-1. Models with fairly similar results between the index-only retrospective and original assessment (Dover sole, canary rockfish, petrale sole, and Pacific spiny dogfish). The dogfish assessment is stabilized by a prior on the WCGBTS catchability
-2. Models which included an environmental index of recruitment the removal of which led to larger changes in the index-only retrospective(yellowtail rockfish and sablefish)
-3. Models for which the scale is poorly informed in the original model, leading to large differences in the index-only retrospective (rougheye/blackspotted rockfish)
+1. Models with fairly similar results between the WCGBTS-only retrospective and original assessment (Dover sole, canary rockfish, petrale sole, and Pacific spiny dogfish). The dogfish assessment is stabilized by a prior on the WCGBTS catchability
+2. Models which included an environmental index of recruitment the removal of which led to larger changes in the WCGBTS-only retrospective(yellowtail rockfish and sablefish)
+3. Models for which the scale is poorly informed in the original model, leading to large differences in the WCGBTS-only retrospective (rougheye/blackspotted rockfish)
+
+Removing the age compositions caused larger differences in the estimates of OFLs for even the stocks in the first group with similar estimates of fraciton unfished. The catch-only scenario resulted in much larger changes for a few models, including Canary and Sablefish, likely due to the lack of information about recent cohorts.
 
 # Lessons learned
 
-Stocks like rougheye/blackspotted rockfish with very little data to inform the scale of the model are likely not suited to this index-only update approach. Spiny dogfish would likely have had the same issue if not for the prior on the catchability of the WCGBTS index. Index based methods which make assumptions about catchability (such as applying the value from the previous full assessment) would be more robust.
+Stocks like rougheye/blackspotted rockfish with very little data to inform the scale of the model are likely not suited to this WCGBTS-only update approach. Spiny dogfish would likely have had the same issue if not for the prior on the catchability of the WCGBTS index. Index based methods which make assumptions about catchability (such as applying the value from the previous full assessment) would be more robust.
 
 Environmental indices of recruitment are an exciting area of lots of ongoing research (as demonstrated by in-prep papers from Megan, Kiva, and Nick), but they add an additional level of complexity to updating assessments. Any form of update for a model with an environmental index of recruitment will require updating the index. 
 
@@ -59,41 +68,77 @@ Any significant change in management (e.g. opening up midwater trawl targeting r
 Stocks like Dover sole with good indices from the WCGBTS and low attainment are probably well suited to a WCGBTS-only update approach.
 
 ```{r}
-#| label: "tbl-results"
+#| label: "tbl-frac"
 #| warning: FALSE
 #| echo: false
 #| eval: true
 #| include: true
-
-tab <- read.csv(here::here("data-raw/index_only_retro/index_only_retro_results.csv"))
-tab |>
+tab_frac <- read.csv(here::here("reports/wcgbts_only_retro/retro_results_fraction_unfished.csv"))
+tab_frac |>
   gt::gt() |>
   gt::cols_label(
     Species = "Species",
-    frac_unfished_endyr_plus1 = "Fraction unfished in final year of index-only retrospective",
-    frac_unfished_endyr_plus1_original = "Fraction unfished in final year of original assessment",
-    OFL_endyr_plus_3 = "OFL in final year + 3 of index-only retrospective",
-    OFL_endyr_plus_3_original = "OFL in final year + 3 years of original assessment",
-    frac_unfished_ratio = "Ratio of fraction unfished: retro/original",
-    OFL_ratio = "Ratio of OFL: retro/original"
+    frac_unfished_original = "Fraction unfished in original full assessment",
+    frac_unfished_wcgbts_only_retro = "Fraction unfished in the Catch + WCGBTS (ind + len + age) retrospective",
+    frac_unfished_wcgbts_no_ages = "Fraction unfished in the Catch + WCGBTS (ind + len) retrospective",
+    frac_unfished_catch_only = "Fraction unfished in the Catch-only retrospective",
+    ratio_wcgbts_only_retro = "Ratio Catch + WCGBTS (ind + len + age) vs original",
+    ratio_wcgbts_no_ages = "Ratio Catch + WCGBTS (ind + len) vs original",
+    ratio_catch_only = "Ratio Catch-only vs original",
   ) |> 
-  # format the ratio columns so that 
+  # format the ratio columns so that
   # - values between 0.9 and 1.1 are colored green
   # - values between 0.5 and 0.9 or between 1.1 and 1.5 are colored yellow
   # - values less than 0.5 or greater than 1.5 are colored red
   gt::data_color(
-    columns = c(frac_unfished_ratio, OFL_ratio),
+    columns = c(ratio_wcgbts_only_retro, ratio_wcgbts_no_ages, ratio_catch_only),
     colors = scales::col_bin(
       bins = c(-Inf, 0.5, 0.9, 1.1, 1.5, Inf),
       palette = c("red", "yellow", "green", "yellow", "red")
     )
   ) |>
   # add caption
-  gt::tab_caption("Comparison of fraction unfished in final year and OFL in final year + 3 between index-only retrospective and original assessment. Green values indicate ratios between 0.9 and 1.1, yellow values indicate ratios between 0.5 and 0.9 or between 1.1 and 1.5, and red values indicate ratios less than 0.5 or greater than 1.5.")
+  gt::tab_caption("Comparison of fraction unfished in final year and OFL in final year + 3 between WCGBTS-only retrospective and original assessment. Green values indicate ratios between 0.9 and 1.1, yellow values indicate ratios between 0.5 and 0.9 or between 1.1 and 1.5, and red values indicate ratios less than 0.5 or greater than 1.5.")
 ```
 
-![Spawning output time series compared between index-only retrospective and original assessment](../figures/index_only_retro/index_only_retro_spawning_output.png){#fig-id fig-alt="alt"}
+```{r}
+#| label: "tbl-ofl"
+#| warning: FALSE
+#| echo: false
+#| eval: true
+#| include: true
+tab_ofl <- read.csv(here::here("reports/wcgbts_only_retro/retro_results_OFL.csv"))
+tab_ofl |>
+  gt::gt() |>
+  gt::cols_label(
+    Species = "Species",
+    OFL_original = "OFL in original full assessment",
+    OFL_wcgbts_only_retro = "OFL in Catch + WCGBTS (ind + len + age) retrospective",
+    OFL_wcgbts_no_ages = "OFL in Catch + WCGBTS (ind + len) retrospective",
+    OFL_catch_only = "OFL in the Catch-only retrospective",
+    OFL_ratio_wcgbts_only_retro = "Ratio Catch + WCGBTS (ind + len + age) vs original",
+    OFL_ratio_wcgbts_no_ages = "Ratio Catch + WCGBTS (ind + len) vs original",
+    OFL_ratio_catch_only = "Ratio Catch-only vs original",
+  ) |>
+  # format the ratio columns so that
+  # - values between 0.9 and 1.1 are colored green
+  # - values between 0.5 and 0.9 or between 1.1 and 1.5 are colored yellow
+  # - values less than 0.5 or greater than 1.5 are colored red
+  gt::data_color(
+    columns = c(OFL_ratio_wcgbts_only_retro, OFL_ratio_wcgbts_no_ages, OFL_ratio_catch_only),
+    colors = scales::col_bin(
+      bins = c(-Inf, 0.5, 0.9, 1.1, 1.5, Inf),
+      palette = c("red", "yellow", "green", "yellow", "red")
+    )
+  ) |>
+  # add caption
+  gt::tab_caption("Comparison of fraction unfished in final year and OFL in final year + 3 between WCGBTS-only retrospective and original assessment. Green values indicate ratios between 0.9 and 1.1, yellow values indicate ratios between 0.5 and 0.9 or between 1.1 and 1.5, and red values indicate ratios less than 0.5 or greater than 1.5.")
+```
 
-![Fraction unfished time series compared between index-only retrospective and original assessment](../figures/index_only_retro/index_only_retro_fraction_unfished.png){#fig-id fig-alt="alt"}
+![Spawning output time series for recent years compared between the retrospectives and original assessment](../figures/wcgbts_only_retro/spawning_output_recent_no_uncertainty.png){#fig-id fig-alt="alt"}
 
-![Fit to WCGBTS index compared between index-only retrospective and original assessment](../figures/index_only_retro/index_only_retro_fit_to_WCGBTS.png){#fig-id fig-alt="alt"}
+![Fraction unfished time series for recent years compared between the retrospectives and original assessment](../figures/wcgbts_only_retro/fraction_unfished_recent_no_uncertainty.png){#fig-id fig-alt="alt"}
+
+![Summary biomass time series for all years compared between the retrospectives and original assessment](../figures/wcgbts_only_retro/summary_biomass.png){#fig-id fig-alt="alt"}
+
+![Fit to WCGBTS index compared between the retrospectives and the original assessment](../figures/wcgbts_only_retro/fit_to_WCGBTS.png){#fig-id fig-alt="alt"}

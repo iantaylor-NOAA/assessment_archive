@@ -1,0 +1,8 @@
+"Species","frac_unfished_original","frac_unfished_wcgbts_only_retro","frac_unfished_wcgbts_no_ages","frac_unfished_catch_only","ratio_wcgbts_only_retro","ratio_wcgbts_no_ages","ratio_catch_only"
+"Dover sole",0.788,0.79,0.754,0.741,1,0.96,0.94
+"Canary rockfish",0.347,0.365,0.356,0.33,1.05,1.03,0.95
+"Petrale sole",0.293,0.291,0.278,0.291,0.99,0.95,0.99
+"Pacific spiny dogfish",0.418,0.392,0.392,0.465,0.94,0.94,1.11
+"Sablefish",0.369,0.446,0.423,0.098,1.21,1.15,0.27
+"Yellowtail rockfish",0.601,0.431,0.469,0.466,0.72,0.78,0.78
+"Rougheye/blackspotted rockfish",0.875,1.074,0.912,1.107,1.23,1.04,1.27
